@@ -1,0 +1,7 @@
+FROM alpine:3.20
+
+RUN apk update && \
+  apk add curl jq && \
+  rm -rf /var/cache/apk/*
+
+ENTRYPOINT ["sh", "-c", "curl --silent https://randomuser.me/api | jq '.results[0]'"]

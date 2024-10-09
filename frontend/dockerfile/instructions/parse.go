@@ -532,7 +532,7 @@ func parseInstall(req parseRequest) (*RunCommand, error) {
   	  rm -rf /var/lib/apt/lists/*`, pkgs)
 	}
 	runReq := parseRequest{
-		command:    command.Run,
+		command:    strings.ToUpper(command.Run),
 		args:       []string{installScript},
 		attributes: req.attributes,
 		flags:      req.flags,
