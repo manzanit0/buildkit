@@ -33,8 +33,10 @@ type parseRequest struct {
 	comments   []string
 }
 
-var parseRunPreHooks []func(*RunCommand, parseRequest) error
-var parseRunPostHooks []func(*RunCommand, parseRequest) error
+var (
+	parseRunPreHooks  []func(*RunCommand, parseRequest) error
+	parseRunPostHooks []func(*RunCommand, parseRequest) error
+)
 
 var parentsEnabled = false
 
@@ -78,7 +80,12 @@ func ParseInstructionWithLinter(node *parser.Node, lint *linter.Linter) (v inter
 		}
 	}()
 	req := newParseRequestFromNode(node)
+	fmt.Println(node.Value)
 	switch strings.ToLower(node.Value) {
+	case command.Install:
+		// TODO: we need to transform req from INSTALL to RUN
+		fmt.Println(req)
+		return parseRun(req)
 	case command.Env:
 		return parseEnv(req)
 	case command.Maintainer:
@@ -588,6 +595,7 @@ func parseOptInterval(f *Flag) (time.Duration, error) {
 	}
 	return d, nil
 }
+
 func parseHealthcheck(req parseRequest) (*HealthCheckCommand, error) {
 	if len(req.args) == 0 {
 		return nil, errAtLeastOneArgument("HEALTHCHECK")
