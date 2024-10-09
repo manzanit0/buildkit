@@ -12,6 +12,7 @@ const (
 	Expose      = "expose"
 	From        = "from"
 	Healthcheck = "healthcheck"
+	Install     = "install"
 	Label       = "label"
 	Maintainer  = "maintainer"
 	Onbuild     = "onbuild"
@@ -21,7 +22,6 @@ const (
 	User        = "user"
 	Volume      = "volume"
 	Workdir     = "workdir"
-	Install     = "install"
 )
 
 // Commands is list of all Dockerfile commands
@@ -35,6 +35,7 @@ var Commands = map[string]struct{}{
 	Expose:      {},
 	From:        {},
 	Healthcheck: {},
+	Install:     {},
 	Label:       {},
 	Maintainer:  {},
 	Onbuild:     {},

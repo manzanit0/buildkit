@@ -204,6 +204,7 @@ func init() {
 		command.Expose:      parseStringsWhitespaceDelimited,
 		command.From:        parseStringsWhitespaceDelimited,
 		command.Healthcheck: parseHealthConfig,
+		command.Install:     parseMaybeJSON,
 		command.Label:       parseLabel,
 		command.Maintainer:  parseString,
 		command.Onbuild:     parseSubCommand,
@@ -506,9 +507,11 @@ func trimComments(src []byte) []byte {
 func trimLeadingWhitespace(src []byte) []byte {
 	return bytes.TrimLeftFunc(src, unicode.IsSpace)
 }
+
 func trimLeadingTabs(src []byte) []byte {
 	return bytes.TrimLeft(src, "\t")
 }
+
 func trimNewline(src []byte) []byte {
 	return bytes.TrimRight(src, "\r\n")
 }

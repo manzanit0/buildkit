@@ -20,7 +20,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-var excludePatternsEnabled = false
+var (
+	currentStage           string
+	excludePatternsEnabled = false
+)
 
 type parseRequest struct {
 	command    string
@@ -80,12 +83,9 @@ func ParseInstructionWithLinter(node *parser.Node, lint *linter.Linter) (v inter
 		}
 	}()
 	req := newParseRequestFromNode(node)
-	fmt.Println(node.Value)
 	switch strings.ToLower(node.Value) {
 	case command.Install:
-		// TODO: we need to transform req from INSTALL to RUN
-		fmt.Println(req)
-		return parseRun(req)
+		return parseInstall(req)
 	case command.Env:
 		return parseEnv(req)
 	case command.Maintainer:
@@ -114,6 +114,8 @@ func ParseInstructionWithLinter(node *parser.Node, lint *linter.Linter) (v inter
 		if fromCmd.Name != "" {
 			validateDefinitionDescription("FROM", []string{fromCmd.Name}, node.PrevComment, node.Location(), lint)
 		}
+
+		currentStage = fromCmd.BaseName
 		return fromCmd, nil
 	case command.Onbuild:
 		return parseOnBuild(req)
@@ -509,6 +511,36 @@ func parseShellDependentCommand(req parseRequest, emptyAsNil bool) (ShellDependa
 		Files:        files,
 		PrependShell: !req.attributes["json"],
 	}, nil
+}
+
+func parseInstall(req parseRequest) (*RunCommand, error) {
+	pkgs := strings.Join(req.args, " ")
+	// TODO(floomis): support version pinning? this is a whole mess with distro package repos
+	// pkgs = strings.ReplaceAll(pkgs, "@", "=")
+
+	var installScript string
+	switch {
+	case strings.HasPrefix(currentStage, "alpine"):
+		installScript = fmt.Sprintf(`
+			apk update && \
+			apk add %s && \
+			rm -rf /var/cache/apk/*`, pkgs)
+	case strings.HasPrefix(currentStage, "debian"):
+		installScript = fmt.Sprintf(`
+			DEBIAN_FRONTEND=noninteractive apt-get update && \
+  		apt-get install -y --no-install-recommends %s && \
+  	  rm -rf /var/lib/apt/lists/*`, pkgs)
+	}
+	runReq := parseRequest{
+		command:    command.Run,
+		args:       []string{installScript},
+		attributes: req.attributes,
+		flags:      req.flags,
+		original:   req.original,
+		location:   req.location,
+		comments:   req.comments,
+	}
+	return parseRun(runReq)
 }
 
 func parseRun(req parseRequest) (*RunCommand, error) {
