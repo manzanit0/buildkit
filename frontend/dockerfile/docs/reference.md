@@ -728,7 +728,7 @@ This can be used to:
 The supported mount types are:
 
 | Type                                     | Description                                                                                                              |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------                |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | [`bind`](#run---mounttypebind) (default) | Bind-mount context directories (read-only).                                                                              |
 | [`cache`](#run---mounttypecache)         | Mount a temporary directory to cache directories for compilers and package managers.                                     |
 | [`tmpfs`](#run---mounttypetmpfs)         | Mount a `tmpfs` in the build container.                                                                                  |
@@ -741,7 +741,7 @@ This mount type allows binding files or directories to the build container. A
 bind mount is read-only by default.
 
 | Option                             | Description                                                                                    |
-| ----------------                   | ---------------------------------------------------------------------------------------------- |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `target`, `dst`, `destination`[^1] | Mount path.                                                                                    |
 | `source`                           | Source path in the `from`. Defaults to the root of the `from`.                                 |
 | `from`                             | Build stage, context, or image name for the root of the source. Defaults to the build context. |
@@ -753,7 +753,7 @@ This mount type allows the build container to cache directories for compilers
 and package managers.
 
 | Option                             | Description                                                                                                                                                                                                                                                                |
-| ---------------                    | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `id`                               | Optional ID to identify separate/different caches. Defaults to value of `target`.                                                                                                                                                                                          |
 | `target`, `dst`, `destination`[^1] | Mount path.                                                                                                                                                                                                                                                                |
 | `ro`,`readonly`                    | Read-only if set.                                                                                                                                                                                                                                                          |
@@ -802,7 +802,7 @@ case.
 This mount type allows mounting `tmpfs` in the build container.
 
 | Option                             | Description                                           |
-| ------------                       | ----------------------------------------------------- |
+| ---------------------------------- | ----------------------------------------------------- |
 | `target`, `dst`, `destination`[^1] | Mount path.                                           |
 | `size`                             | Specify an upper limit on the size of the filesystem. |
 
@@ -863,7 +863,7 @@ This mount type allows the build container to access SSH keys via SSH agents,
 with support for passphrases.
 
 | Option                         | Description                                                                                    |
-| ----------                     | ---------------------------------------------------------------------------------------------- |
+| ------------------------------ | ---------------------------------------------------------------------------------------------- |
 | `id`                           | ID of SSH agent socket or key. Defaults to "default".                                          |
 | `target`, `dst`, `destination` | SSH agent socket path. Defaults to `/run/buildkit/ssh_agent.${N}`.                             |
 | `required`                     | If set to `true`, the instruction errors out when the key is unavailable. Defaults to `false`. |
@@ -1017,7 +1017,7 @@ both the `CMD` and `ENTRYPOINT` instructions should be specified in the
 ## LABEL
 
 ```dockerfile
-LABEL <key>=<value> <key>=<value> <key>=<value> ...
+LABEL <key>=<value> [<key>=<value>...]
 ```
 
 The `LABEL` instruction adds metadata to an image. A `LABEL` is a
@@ -1144,7 +1144,7 @@ port. For detailed information, see the
 ## ENV
 
 ```dockerfile
-ENV <key>=<value> ...
+ENV <key>=<value> [<key>=<value>...]
 ```
 
 The `ENV` instruction sets the environment variable `<key>` to the value
@@ -1237,7 +1237,7 @@ The available `[OPTIONS]` are:
 | [`--chown`](#add---chown---chmod)       |                            |
 | [`--chmod`](#add---chown---chmod)       | 1.2                        |
 | [`--link`](#add---link)                 | 1.4                        |
-| [`--exclude`](#add---exclude)           | 1.7                        |
+| [`--exclude`](#add---exclude)           | 1.7-labs                   |
 
 The `ADD` instruction copies new files or directories from `<src>` and adds
 them to the filesystem of the image at the path `<dest>`. Files and directories
@@ -1522,8 +1522,8 @@ The available `[OPTIONS]` are:
 | [`--chown`](#copy---chown---chmod) |                            |
 | [`--chmod`](#copy---chown---chmod) | 1.2                        |
 | [`--link`](#copy---link)           | 1.4                        |
-| [`--parents`](#copy---parents)     | 1.7                        |
-| [`--exclude`](#copy---exclude)     | 1.7                        |
+| [`--parents`](#copy---parents)     | 1.7-labs                   |
+| [`--exclude`](#copy---exclude)     | 1.7-labs                   |
 
 The `COPY` instruction copies new files or directories from `<src>` and adds
 them to the filesystem of the image at the path `<dest>`. Files and directories
@@ -1820,7 +1820,7 @@ COPY [--parents[=<boolean>]] <src> ... <dest>
 The `--parents` flag preserves parent directories for `src` entries. This flag defaults to `false`.
 
 ```dockerfile
-# syntax=docker/dockerfile:1.7-labs
+# syntax=docker/dockerfile:1-labs
 FROM scratch
 
 COPY ./x/a.txt ./y/a.txt /no_parents/
@@ -1840,7 +1840,7 @@ directories after it will be preserved. This may be especially useful copies bet
 with `--from` where the source paths need to be absolute.
 
 ```dockerfile
-# syntax=docker/dockerfile:1.7-labs
+# syntax=docker/dockerfile:1-labs
 FROM scratch
 
 COPY --parents ./x/./y/*.txt /parents/
@@ -1882,6 +1882,9 @@ supporting wildcards and matching using Go's
 For example, to add all files starting with "hom", excluding files with a `.txt` extension:
 
 ```dockerfile
+# syntax=docker/dockerfile:1-labs
+FROM scratch
+
 COPY --exclude=*.txt hom* /mydir/
 ```
 
@@ -1891,6 +1894,9 @@ even if the files paths match the pattern specified in `<src>`.
 To add all files starting with "hom", excluding files with either `.txt` or `.md` extensions:
 
 ```dockerfile
+# syntax=docker/dockerfile:1-labs
+FROM scratch
+
 COPY --exclude=*.txt --exclude=*.md hom* /mydir/
 ```
 
@@ -2310,7 +2316,7 @@ Therefore, to avoid unintended operations in unknown directories, it's best prac
 ## ARG
 
 ```dockerfile
-ARG <name>[=<default value>]
+ARG <name>[=<default value>] [<name>[=<default value>]...]
 ```
 
 The `ARG` instruction defines a variable that users can pass at build-time to
